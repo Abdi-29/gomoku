@@ -1,0 +1,13 @@
+
+cargo-features = [ "edition2024" ]
+[package]
+name = "gomoku"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+eframe = "0.32.1"
+egui = "0.32.1"
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+
