@@ -7,7 +7,7 @@ pub fn draw_board(board: &Board, texture: &Texture2D, cell_size: f32) {
     let offset_y = (screen_height() - cell_size * (size - 1.0)) / 2.0;
     // wood texture
     draw_texture_ex(
-        *texture,
+        texture,
         0.0,
         0.0,
         WHITE,
@@ -23,13 +23,15 @@ pub fn draw_board(board: &Board, texture: &Texture2D, cell_size: f32) {
         draw_line(offset_x, y, offset_x + (size - 1.0) * cell_size, y, 2.0, BLACK);
         draw_line(x, offset_y, x, offset_y + (size - 1.0) * cell_size, 2.0, BLACK);
     }
-    // stones draw
+    // stones draw 
+    // TODO implement 3d rendering for the stone so implement a camera
     for y in 0..board.size {
         for x in 0..board.size {
             if let Some(player) = board.cells[y][x] {
-                let cx = offset_x + x as f32 * cell_size;
-                let cy = offset_y + y as f32 * cell_size;
-                draw_circle(cx, cy, cell_size * 0.4, if player { BLACK } else { WHITE });
+                let color = if player { BLACK } else { WHITE };
+                let center_x = offset_x + x as f32 * cell_size;
+                let center_y = offset_y + y as f32 * cell_size;
+                draw_circle(center_x, center_y, cell_size * 0.4, color);
             }
         }
     }
