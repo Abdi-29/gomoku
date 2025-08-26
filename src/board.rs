@@ -4,6 +4,11 @@ pub struct Board {
     pub current_player: bool,
 }
 
+// pub struct Square {
+//     x: usize,
+//     y: usize
+// }
+
 impl Board {
     pub fn new(size: usize) -> Self {
         Self {
@@ -19,4 +24,17 @@ impl Board {
             self.current_player = !self.current_player;
         }
     }
+
+    // pub fn check_winner(&self, x: usize, y: usize) -> Option<bool> {
+    //     let directions = [
+    //         (0, 1),
+    //         (1, 0),
+    //         (1, 1),
+    //         (1, -1)
+    //     ];
+
+    //     if let Some(player) = {
+
+    //     }
+    // }
 }
