@@ -1,7 +1,7 @@
 use macroquad::prelude::*;
-use crate::board::Board;
+use crate::{board::Board, GameState};
 
-pub fn draw_board(board: &Board, texture: &Texture2D, white_stone: &Texture2D, black_stone: &Texture2D, cell_size: f32) {
+pub fn draw_board(board: &Board, texture: &Texture2D, white_stone: &Texture2D, black_stone: &Texture2D, cell_size: f32, game_state: &GameState) {
     let size = board.size as f32;
     let offset_x = (screen_width() - cell_size * (size - 1.0)) / 2.0;
     let offset_y = (screen_height() - cell_size * (size - 1.0)) / 2.0;
@@ -25,13 +25,13 @@ pub fn draw_board(board: &Board, texture: &Texture2D, white_stone: &Texture2D, b
         draw_line(offset_x, y, offset_x + (size - 1.0) * cell_size, y, 2.0, DARKBROWN);
         draw_line(x, offset_y, x, offset_y + (size - 1.0) * cell_size, 2.0, DARKBROWN);
     }
-    // stones draw 
+    // stones draw
     for y in 0..board.size {
         for x in 0..board.size {
             if let Some(player) = board.cells[y][x] {
                 // let color = if player { BLACK } else { WHITE };
-                let center_x = offset_x + x as f32 * cell_size - cell_size * 0.4;
-                let center_y = offset_y + y as f32 * cell_size - cell_size * 0.4;
+                let center_x = offset_x + x as f32 * cell_size - cell_size * 0.5;
+                let center_y = offset_y + y as f32 * cell_size - cell_size * 0.5;
                 let params = DrawTextureParams {
                     dest_size: Some(vec2(cell_size, cell_size)),
                     ..Default::default()
@@ -43,36 +43,59 @@ pub fn draw_board(board: &Board, texture: &Texture2D, white_stone: &Texture2D, b
         }
     }
 
-    // Preview move on hover
-    let (mouse_x, mouse_y) = mouse_position();
-    let grid_x = ((mouse_x - offset_x) / cell_size).round() as i32;
-    let grid_y = ((mouse_y - offset_y) / cell_size).round() as i32;
-
-    if grid_x >= 0 && grid_y >= 0 && grid_x < board.size as i32 && grid_y < board.size as i32 {
-        if board.cells[grid_y as usize][grid_x as usize].is_none() {
-            let preview_stone = if board.current_player {
-                black_stone
-            } else {
-                white_stone
-            };
-
-            let center_x = offset_x + grid_x as f32 * cell_size - cell_size * 0.5;
-            let center_y = offset_y + grid_y as f32 * cell_size - cell_size * 0.5;
-
-            let params = DrawTextureParams {
-                dest_size: Some(vec2(cell_size, cell_size)),
-                ..Default::default()
-            };
-
-            draw_texture_ex(
-                preview_stone,
-                center_x,
-                center_y,
-                Color::new(1.0, 1.0, 1.0, 0.5),
-                params,
-            );
+    // Preview move
+    if *game_state == GameState::Ongoing {
+        let (mouse_x, mouse_y) = mouse_position();
+        let grid_x = ((mouse_x - offset_x) / cell_size).round() as i32;
+        let grid_y = ((mouse_y - offset_y) / cell_size).round() as i32;
+    
+        if grid_x >= 0 && grid_y >= 0 && grid_x < board.size as i32 && grid_y < board.size as i32 {
+            if board.cells[grid_y as usize][grid_x as usize].is_none() {
+                let preview_stone = if board.current_player {
+                    black_stone
+                } else {
+                    white_stone
+                };
+    
+                let center_x = offset_x + grid_x as f32 * cell_size - cell_size * 0.5;
+                let center_y = offset_y + grid_y as f32 * cell_size - cell_size * 0.5;
+    
+                let params = DrawTextureParams {
+                    dest_size: Some(vec2(cell_size, cell_size)),
+                    ..Default::default()
+                };
+    
+                draw_texture_ex(
+                    preview_stone,
+                    center_x,
+                    center_y,
+                    Color::new(1.0, 1.0, 1.0, 0.5),
+                    params,
+                );
+            }
+        }
     }
-}
+
+    if let GameState::Over(winner) = game_state {
+        let winner_text = match winner {
+            Some(true) => "Black wins!",
+            Some(false) => "White wins!",
+            None => "It's a draw!"
+        };
+
+        // let promt_text = "Game Over. Press [enter] to play again or [Esc] to scape.";
+        let font_size = 40.;
+        let text_size = measure_text(winner_text, None, font_size as _, 1.0);
+
+        draw_text(winner_text,
+            (screen_width() - text_size.width) / 2.,
+            (screen_height() - text_size.height) / 2. - 100.,
+            font_size,
+            BLACK,
+        );
+
+
+    }
 
 }
 
