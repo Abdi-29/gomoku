@@ -4,10 +4,10 @@ pub struct Board {
     pub current_player: bool,
 }
 
-// pub struct Square {
-//     x: usize,
-//     y: usize
-// }
+pub struct Position {
+    pub x: usize,
+    pub y: usize
+}
 
 impl Board {
     pub fn new(size: usize) -> Self {
@@ -25,16 +25,44 @@ impl Board {
         }
     }
 
-    // pub fn check_winner(&self, x: usize, y: usize) -> Option<bool> {
-    //     let directions = [
-    //         (0, 1),
-    //         (1, 0),
-    //         (1, 1),
-    //         (1, -1)
-    //     ];
+    pub fn check_winner(&self, pos: Position) -> Option<bool> {
+        if let Some(player) = self.cells[pos.y][pos.x] {
+            let directions = [
+            (0, 1),
+            (1, 0),
+            (1, 1),
+            (1, -1)
+            ];
 
-    //     if let Some(player) = {
+            for &(dx, dy) in &directions {
+                let mut count = 1;
+                count += self.count_dir(pos.x, pos.y, dx, dy, player);
+                count += self.count_dir(pos.x, pos.y, -dx, -dy, player);
 
-    //     }
-    // }
+                if count >= 3 {
+                    return Some(player);
+                }
+            }
+        }
+        None
+    }
+
+    fn count_dir(&self, mut x: usize, mut y: usize, dx: isize, dy: isize, player: bool) -> usize {
+        let mut count = 0;
+        loop {
+            if dx < 0 && x == 0 || dy < 0 && y == 0 {
+                break;
+            }
+
+            x = (x as isize + dx) as usize;
+            y = (y as isize + dy) as usize;
+            if x >= self.size || y >= self.size {
+                break;
+            } else if self.cells[y][x] != Some(player) {
+                break;
+            }
+            count += 1;
+        }
+        count
+    }
 }

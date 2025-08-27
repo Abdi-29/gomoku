@@ -26,7 +26,6 @@ pub fn draw_board(board: &Board, texture: &Texture2D, white_stone: &Texture2D, b
         draw_line(x, offset_y, x, offset_y + (size - 1.0) * cell_size, 2.0, DARKBROWN);
     }
     // stones draw 
-    // TODO implement 3d rendering for the stone so implement a camera
     for y in 0..board.size {
         for x in 0..board.size {
             if let Some(player) = board.cells[y][x] {
@@ -43,6 +42,39 @@ pub fn draw_board(board: &Board, texture: &Texture2D, white_stone: &Texture2D, b
             }
         }
     }
+
+    // Preview move on hover
+    let (mouse_x, mouse_y) = mouse_position();
+    let grid_x = ((mouse_x - offset_x) / cell_size).round() as i32;
+    let grid_y = ((mouse_y - offset_y) / cell_size).round() as i32;
+
+    if grid_x >= 0 && grid_y >= 0 && grid_x < board.size as i32 && grid_y < board.size as i32 {
+        if board.cells[grid_y as usize][grid_x as usize].is_none() {
+            let preview_stone = if board.current_player {
+                black_stone
+            } else {
+                white_stone
+            };
+
+            let center_x = offset_x + grid_x as f32 * cell_size - cell_size * 0.5;
+            let center_y = offset_y + grid_y as f32 * cell_size - cell_size * 0.5;
+
+            let params = DrawTextureParams {
+                dest_size: Some(vec2(cell_size, cell_size)),
+                ..Default::default()
+            };
+
+            draw_texture_ex(
+                preview_stone,
+                center_x,
+                center_y,
+                Color::new(1.0, 1.0, 1.0, 0.5),
+                params,
+            );
+    }
 }
+
+}
+
 
 //TODO preview the move before deciding

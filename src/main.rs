@@ -7,7 +7,9 @@ use board::Board;
 use rendering::draw_board;
 use input::handle_input;
 
-const BOARD_SIZE: usize = 5;
+use crate::board::Position;
+
+const BOARD_SIZE: usize = 15;
 const CELL_SIZE: f32 = 70.0;
 
 #[macroquad::main("Gomoku")]
@@ -24,10 +26,15 @@ async fn main() {
     loop {
         clear_background(GRAY);
         
-        draw_board(&board, &texture, &white_stone, &black_stone, CELL_SIZE);
-        if let Some((x, y)) = handle_input(CELL_SIZE, BOARD_SIZE) {
+        draw_board(&board, &texture, &white_stone, &black_stone, screen_width() / 20.0);
+        if let Some((x, y)) = handle_input(screen_width() / 20.0, BOARD_SIZE) {
             print!("x: {x} and y: {y}\n");
-            board.place_stone(x, y);
+            let pos = Position{x, y};
+            board.place_stone(x, y); // TODO refactor 
+            if let Some(winner) = board.check_winner(pos) {
+                println!("winner: {}", if winner {"Black"} else {"White"});
+                //TODO handle the game end on the gui
+            }
         }
         next_frame().await
     }
