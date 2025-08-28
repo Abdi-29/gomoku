@@ -1,12 +1,48 @@
+use std::ops::Add;
+
+#[derive(Clone, Copy, Debug)]
+pub struct Position {
+    pub x: usize,
+    pub y: usize
+}
+
+#[derive(Clone, Copy, Debug)]
+pub struct Delta {
+    pub dx: isize,
+    pub dy: isize
+}
+
+impl Position{
+    pub fn new(x: usize, y: usize) -> Self {
+        Self {x, y}
+    }
+
+    pub fn valid_pos(&self, size: usize) -> bool {
+        self.x < size && self.y < size
+    }
+}
+
+impl Add<Delta> for Position {
+    type Output = Option<Position>;
+
+    fn add(self, rhs: Delta) -> Self::Output {
+        let x = self.x as isize + rhs.dx;
+        let y = self.y as isize + rhs.dy;
+
+        if x > 0 && y > 0 {
+            Some(Position { x: x as usize, y: y as usize })
+        } else {
+            None
+        }
+    }
+}
+
 pub struct Board {
     pub size: usize,
     pub cells: Vec<Vec<Option<bool>>>,
     pub current_player: bool,
-}
-
-pub struct Position {
-    pub x: usize,
-    pub y: usize
+    pub black_capture: usize,
+    pub white_capture: usize
 }
 
 impl Board {
@@ -15,7 +51,27 @@ impl Board {
             size,
             cells: vec![vec![None; size]; size],
             current_player: true,
+            black_capture: 0,
+            white_capture: 0
         }
+    }
+
+    pub fn get_cell(&self, pos: Position) -> Option<bool> {
+        if pos.valid_pos(self.size) {
+            self.cells[pos.y][pos.x]
+        } else {
+            None
+        }
+    }
+
+    pub fn set_cell(&mut self, pos: Position, value: Option<bool>) {
+        if pos.valid_pos(self.size) {
+            self.cells[pos.y][pos.x] = value;
+        }
+    }
+
+    pub fn is_board_full(&self) -> bool {
+        self.cells.iter().all(|row| row.iter().all(|cell| cell.is_some()))
     }
 
     pub fn place_stone(&mut self, x: usize, y: usize) {

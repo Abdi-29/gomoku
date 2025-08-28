@@ -9,7 +9,7 @@ use input::handle_input;
 
 use crate::board::Position;
 
-const BOARD_SIZE: usize = 15;
+const BOARD_SIZE: usize = 3;
 const CELL_SIZE: f32 = 70.0;
 
 #[derive(PartialEq)]
