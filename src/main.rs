@@ -40,7 +40,7 @@ async fn main() {
                 if let Some((x, y)) = handle_input(screen_width() / 20.0, BOARD_SIZE) {
                     print!("x: {x} and y: {y}\n");
                     let pos = Position{x, y};
-                    board.place_stone(x, y); // TODO refactor using Position
+                    board.place_stone(pos); // TODO refactor using Position
                     if let Some(winner) = board.check_winner(pos) {
                         game_state = GameState::Over(Some(winner));
                         println!("winner: {}", if winner {"Black"} else {"White"});

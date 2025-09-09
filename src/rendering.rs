@@ -76,6 +76,11 @@ pub fn draw_board(board: &Board, texture: &Texture2D, white_stone: &Texture2D, b
         }
     }
 
+    let black_capt = format!("Black Captures: {}", board.black_capture);
+    let white_capt = format!("White Captures: {}", board.white_capture);
+    draw_text(&black_capt, 10.0, 20.0, 20.0, BLACK);
+    draw_text(&white_capt, 10.0, 50.0, 20.0, WHITE);
+
     if let GameState::Over(winner) = game_state {
         let winner_text = match winner {
             Some(true) => "Black wins!",

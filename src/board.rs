@@ -20,6 +20,10 @@ impl Position{
     pub fn valid_pos(&self, size: usize) -> bool {
         self.x < size && self.y < size
     }
+
+    pub fn is_valid(&self, size: usize) -> bool {
+        self.x < size && self.y < size
+    }
 }
 
 impl Add<Delta> for Position {
@@ -74,26 +78,43 @@ impl Board {
         self.cells.iter().all(|row| row.iter().all(|cell| cell.is_some()))
     }
 
-    pub fn place_stone(&mut self, x: usize, y: usize) {
-        if x < self.size && y < self.size && self.cells[y][x].is_none() {
-            self.cells[y][x] = Some(self.current_player);
-            self.current_player = !self.current_player;
+    pub fn is_valid_move(&self, pos: Position) -> bool {
+        if !pos.is_valid(self.size) || self.get_cell(pos).is_some() {
+            return false;
         }
+        true
+    }
+
+    pub fn place_stone(&mut self, pos: Position) {
+        if !self.is_valid_move(pos) {
+            return;
+        }
+        self.set_cell(pos, Some(self.current_player));
+        self.capture(pos, self.current_player);
+        self.current_player = !self.current_player;
     }
 
     pub fn check_winner(&self, pos: Position) -> Option<bool> {
-        if let Some(player) = self.cells[pos.y][pos.x] {
-            let directions = [
-            (0, 1),
-            (1, 0),
-            (1, 1),
-            (1, -1)
+        if self.black_capture >= 10 {
+            return Some(true);
+        }
+        if self.white_capture >= 10 {
+            return Some(false);
+        }
+
+        if let Some(player) = self.get_cell(pos) {
+            let dirs = [
+                Delta {dx: 1, dy: 0},
+                Delta {dx: 0, dy: 1},
+                Delta {dx: 1, dy: 1},
+                Delta {dx: 1, dy: -1}
             ];
 
-            for &(dx, dy) in &directions {
+            for dir in dirs {
                 let mut count = 1;
-                count += self.count_dir(pos.x, pos.y, dx, dy, player);
-                count += self.count_dir(pos.x, pos.y, -dx, -dy, player);
+                count += self.count_dir(pos, dir, player);
+                let neg_dir = Delta { dx: -dir.dx, dy: -dir.dy };
+                count += self.count_dir(pos, neg_dir, player);
 
                 if count >= 3 {
                     return Some(player);
@@ -103,22 +124,58 @@ impl Board {
         None
     }
 
-    fn count_dir(&self, mut x: usize, mut y: usize, dx: isize, dy: isize, player: bool) -> usize {
+    fn count_dir(&self, s_pos: Position, dir: Delta, player: bool) -> usize {
         let mut count = 0;
+        let mut curr_pos = s_pos;
         loop {
-            if dx < 0 && x == 0 || dy < 0 && y == 0 {
+            if let Some(n_pos) = curr_pos + dir {
+                if !n_pos.is_valid(self.size) {
+                    break;
+                }
+                if self.get_cell(n_pos) == Some(player) {
+                    count += 1;
+                    curr_pos = n_pos;
+                } else {
+                    break;
+                }
+            } else {
                 break;
             }
-
-            x = (x as isize + dx) as usize;
-            y = (y as isize + dy) as usize;
-            if x >= self.size || y >= self.size {
-                break;
-            } else if self.cells[y][x] != Some(player) {
-                break;
-            }
-            count += 1;
         }
         count
+    }
+
+    pub fn capture(&mut self, pos: Position, player: bool) {
+        let turn = !player;
+        let dirs = [
+            Delta {dx: 1, dy: 0},
+            Delta {dx: 0, dy: 1},
+            Delta {dx: 1, dy: 1},
+            Delta {dx: 1, dy: -1}
+        ];
+
+        for dir in dirs {
+            for sign in [1, -1] {
+                let tmp_dir = Delta { dx: dir.dx * sign, dy: dir.dy * sign };
+                if let (Some(p1), Some(p2), Some(p3)) = (
+                    pos + tmp_dir,
+                    pos + Delta { dx: tmp_dir.dx * 2, dy: tmp_dir.dy * 2 },
+                    pos + Delta { dx: tmp_dir.dx * 3, dy: tmp_dir.dy * 3 },
+                ) {
+                    if p1.is_valid(self.size) && p2.is_valid(self.size) && p3.is_valid(self.size)
+                        && self.get_cell(p1) == Some(turn)
+                        && self.get_cell(p2) == Some(turn)
+                        && self.get_cell(p3) == Some(player) {
+                        self.set_cell(p1, None);
+                        self.set_cell(p2, None);
+                        if player {
+                            self.black_capture += 2;
+                        } else {
+                            self.white_capture += 2;
+                        }
+                    }
+                }
+            }
+        }
     }
 }
