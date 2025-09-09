@@ -9,7 +9,7 @@ use input::handle_input;
 
 use crate::board::Position;
 
-const BOARD_SIZE: usize = 3;
+const BOARD_SIZE: usize = 10;
 const CELL_SIZE: f32 = 70.0;
 
 #[derive(PartialEq)]
@@ -33,11 +33,11 @@ async fn main() {
     loop {
         clear_background(GRAY);
         
-        draw_board(&board, &texture, &white_stone, &black_stone, screen_width() / 20.0, &game_state);
+        draw_board(&board, &texture, &white_stone, &black_stone, screen_width() / 20.0 + 10., &game_state);
         
         match game_state {
             GameState::Ongoing => {
-                if let Some((x, y)) = handle_input(screen_width() / 20.0, BOARD_SIZE) {
+                if let Some((x, y)) = handle_input(screen_width() / 20.0 + 10., BOARD_SIZE) {
                     print!("x: {x} and y: {y}\n");
                     let pos = Position{x, y};
                     board.place_stone(pos); // TODO refactor using Position
