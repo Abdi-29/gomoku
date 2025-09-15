@@ -144,7 +144,7 @@ impl Board {
         None
     }
 
-    fn count_dir(&self, mut s_pos: Position, dx: isize, dy: isize, player: bool) -> usize {
+    pub fn count_dir(&self, mut s_pos: Position, dx: isize, dy: isize, player: bool) -> usize {
         let mut count = 0;
         // let mut curr_pos = s_pos;
         loop {
@@ -214,6 +214,18 @@ impl Board {
                     }
                 }
             }
+        }
+    }
+}
+
+impl Clone for Board {
+    fn clone(&self) -> Self {
+        Board {
+            size: self.size,
+            cells: self.cells.clone(),
+            current_player: self.current_player,
+            black_capture: self.black_capture,
+            white_capture: self.white_capture,
         }
     }
 }
