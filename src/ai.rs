@@ -1,8 +1,7 @@
 use std::collections::HashSet;
+use rand::prelude::*;
 
 use crate::board::{Board, Delta, Position};
-use rand::seq::SliceRandom;
-use rand::thread_rng;
 
 pub fn best_move(board: &Board) -> Option<Position> {
     let moves = generate_valid_moves(board);
@@ -12,11 +11,12 @@ pub fn best_move(board: &Board) -> Option<Position> {
 
     let mut best_score = i32::MIN;
     let mut best_moves = Vec::new();
+    let mut rng = rand::rng();
 
     for &pos in &moves {
         let mut sim_board = board.clone();
         sim_board.place_stone(pos);
-        let score = minimax(&sim_board, 2, !board.current_player, pos); // Depth 2, opponent's turn, pass pos as last
+        let score = minimax(&sim_board, 4, !board.current_player, pos); // Depth 2, opponent's turn, pass pos as last
         if score > best_score {
             best_score = score;
             best_moves.clear();
@@ -26,7 +26,8 @@ pub fn best_move(board: &Board) -> Option<Position> {
         }
     }
 
-    best_moves.choose(&mut thread_rng()).copied()
+    println!("best_move {:#?}", best_moves);
+    best_moves.choose(&mut rng).copied()
 }
 
 fn generate_valid_moves(board: &Board) -> Vec<Position> {
@@ -42,9 +43,12 @@ fn generate_valid_moves(board: &Board) -> Vec<Position> {
         Delta { dx: 1, dy: 1 },
     ];
 
+    let mut has_occupained = false;
+
     for y in 0..board.size {
         for x in 0..board.size {
             if board.get_cell(Position { x, y }).is_some() {
+                has_occupained = true;
                 let pos = Position { x, y };
                 for &dir in &directions {
                     if let Some(neighbor) = pos + dir {
@@ -56,6 +60,20 @@ fn generate_valid_moves(board: &Board) -> Vec<Position> {
             }
         }
     }
+
+    if !has_occupained {
+        let center = Position{x: board.size / 2,  y: board.size / 2};
+        moves.insert(center);
+
+        for &dir in &directions {
+            if let Some(neighbor) = center + dir {
+                if neighbor.is_valid(board.size) && board.get_cell(neighbor).is_none() {
+                    moves.insert(neighbor);
+                }
+            }
+        }
+    }
+
     moves.into_iter().collect()
 }
 
@@ -108,5 +126,5 @@ fn evaluate(board: &Board, player: bool, last_pos: Position) -> i32 {
                         board.count_dir(last_pos, -dir.dx, -dir.dy, !player);
         score -= opp_count * 10;
     }
-    score
+    score.try_into().unwrap()
 }

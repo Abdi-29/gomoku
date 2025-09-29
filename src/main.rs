@@ -11,7 +11,7 @@ use ai::best_move;
 
 use crate::board::Position;
 
-const BOARD_SIZE: usize = 10;
+const BOARD_SIZE: usize = 3;
 
 enum Mode {
     PvP,
@@ -37,7 +37,7 @@ async fn main() {
 
     let mut game_state = GameState::Ongoing;
     // add on the ui later
-    let mut mode = Mode::PvAI(true);
+    let mode = Mode::PvAI(true);
 
     loop {
         clear_background(GRAY);
