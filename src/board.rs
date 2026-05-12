@@ -17,10 +17,6 @@ impl Position{
         Self {x, y}
     }
 
-    pub fn valid_pos(&self, size: usize) -> bool {
-        self.x < size && self.y < size
-    }
-
     pub fn is_valid(&self, size: usize) -> bool {
         self.x < size && self.y < size
     }
@@ -61,7 +57,7 @@ impl Board {
     }
 
     pub fn get_cell(&self, pos: Position) -> Option<bool> {
-        if pos.valid_pos(self.size) {
+        if pos.is_valid(self.size) {
             self.cells[pos.y][pos.x]
         } else {
             None
@@ -69,7 +65,7 @@ impl Board {
     }
 
     pub fn set_cell(&mut self, pos: Position, value: Option<bool>) {
-        if pos.valid_pos(self.size) {
+        if pos.is_valid(self.size) {
             self.cells[pos.y][pos.x] = value;
         }
     }
