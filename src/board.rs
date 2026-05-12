@@ -29,7 +29,7 @@ impl Add<Delta> for Position {
         let x = self.x as isize + rhs.dx;
         let y = self.y as isize + rhs.dy;
 
-        if x > 0 && y > 0 {
+        if x >= 0 && y >= 0 {
             Some(Position { x: x as usize, y: y as usize })
         } else {
             None
